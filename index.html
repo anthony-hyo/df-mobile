@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DF Pocket</title>
+    <style>
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        background: #530000;
+        overflow: hidden;
+      }
+
+      body {
+        display: grid;
+        place-items: center;
+      }
+
+      #game {
+        width: min(100vw, calc(100vh * 1.3636));
+        height: min(100vh, calc(100vw / 1.3636));
+      }
+
+      object,
+      embed {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+    </style>
+    <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
+    <script>
+      window.RufflePlayer = window.RufflePlayer || {};
+      window.RufflePlayer.config = {
+        ...window.RufflePlayer.config,
+        urlRewriteRules: [
+          [
+            /^(?:https?:\/\/[^/]+)?\/?(?:game\/)?(.*)$/i,
+            "https://play.dragonfable.com/game/$1",
+          ],
+        ],
+      };
+    </script>
+  </head>
+  <body>
+    <div id="game">
+      <object
+        id="FFable"
+        classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"
+        codebase="https://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=7,0,0,0"
+        width="750"
+        height="550"
+        align="middle"
+      >
+        <param name="allowScriptAccess" value="sameDomain">
+        <param name="movie" value="DFLoader.swf?ver=393831">
+        <param name="menu" value="false">
+        <param name="allowFullScreen" value="true">
+        <param name="flashvars" value="">
+        <param name="bgcolor" value="#530000">
+        <embed
+          src="https://play.dragonfable.com/game/DFLoader.swf?ver=393831"
+          flashvars=""
+          name="FFable"
+          bgcolor="#530000"
+          menu="false"
+          allowFullScreen="true"
+          width="750"
+          height="550"
+          align="middle"
+          allowScriptAccess="sameDomain"
+          type="application/x-shockwave-flash"
+          pluginspage="https://www.macromedia.com/go/getflashplayer"
+          swLiveConnect="true"
+        >
+      </object>
+    </div>
+  </body>
+</html>
