@@ -10,6 +10,10 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 public class MainActivity extends Activity {
     private WebView webView;
@@ -55,7 +59,13 @@ public class MainActivity extends Activity {
 
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient());
-        webView.loadUrl("file:///android_asset/index.html");
+        webView.loadDataWithBaseURL(
+                "https://play.dragonfable.com/game/",
+                readAsset("index.html"),
+                "text/html",
+                "UTF-8",
+                "https://play.dragonfable.com/game/"
+        );
     }
 
     @Override
@@ -76,5 +86,23 @@ public class MainActivity extends Activity {
         }
 
         super.onDestroy();
+    }
+
+    private String readAsset(String fileName) {
+        StringBuilder builder = new StringBuilder();
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                getAssets().open(fileName),
+                StandardCharsets.UTF_8
+        ))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                builder.append(line).append('\n');
+            }
+        } catch (IOException exception) {
+            throw new IllegalStateException("Unable to load " + fileName, exception);
+        }
+
+        return builder.toString();
     }
 }
