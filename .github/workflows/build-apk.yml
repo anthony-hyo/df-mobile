@@ -65,8 +65,8 @@ jobs:
             -   name: Create Release
                 uses: softprops/action-gh-release@v2
                 with:
-                    tag_name: v${{ github.run_number }}
-                    name: Build ${{ github.run_number }}
+                    tag_name: v1
+                    name: Build
                     body: |
                         ## Download DF Pocket
                         
@@ -75,11 +75,4 @@ jobs:
                         - **armv8** (recommended) - `df-pocket-armv8.apk`
                         - **armv7** (32-bit devices) - `df-pocket-armv7.apk`
                         - **x86_64** (Chrome OS/Emulator) - `df-pocket-x86_64.apk`
-                        
-                        ---
-                        
-                        ### Build Info
-                        
-                        - **Build**: ${{ github.run_number }}
-                        - **Built**: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
                     files: releases/*.apk
