@@ -53,9 +53,17 @@ public class MainActivity extends Activity {
         settings.setLoadWithOverviewMode(true);
         settings.setUseWideViewPort(true);
 
+        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        settings.setSafeBrowsingEnabled(false);
+        settings.setOffscreenPreRaster(false);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         }
+
+        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+
+        webView.setBackgroundColor(Color.BLACK);
 
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient());

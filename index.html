@@ -42,18 +42,6 @@
             }
         </style>
         <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
-        <script>
-            window.RufflePlayer = window.RufflePlayer || {};
-            window.RufflePlayer.config = {
-                ...window.RufflePlayer.config,
-                urlRewriteRules: [
-                    [
-                        /^(?:https?:\/\/[^/]+)?\/?(?:game\/)?(.*)$/i,
-                        "https://play.dragonfable.com/game/$1",
-                    ],
-                ],
-            };
-        </script>
     </head>
     <body>
         <div id="stage">
@@ -69,7 +57,37 @@
         </div>
 
         <script>
+            window.RufflePlayer = window.RufflePlayer || {};
+            window.RufflePlayer.config = {
+                ...window.RufflePlayer.config,
+                urlRewriteRules: [
+                    [
+                        /^(?:https?:\/\/[^/]+)?\/?(?:game\/)?(.*)$/i,
+                        "https://play.dragonfable.com/game/$1",
+                    ],
+                ],
+                
+                preferredRenderer: "webgl", 
+                quality: "medium",
+                letterbox: "off",
+                splashScreen: false,
+                preloader: false,
+                scrollingBehavior: "never",
+                deviceFontRenderer: "embedded",
+                backgroundExecutionMode: "none",
+                logLevel: "error",
+            };
+            
             (function () {
+                try {
+                    Object.defineProperty(window, "devicePixelRatio", {
+                        get: () => 1,
+                        configurable: true,
+                    });
+                } catch (e) {
+                    console.warn(e);
+                }
+                
                 const stage = document.getElementById('stage');
                 const GAME_W = 750;
                 const GAME_H = 550;
