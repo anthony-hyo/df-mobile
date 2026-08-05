@@ -35,7 +35,7 @@ android {
     }
 }
 
-val workspaceRoot = rootProject.projectDir.resolve("..").normalize()
+val workspaceRoot = rootProject.projectDir.normalize()
 
 tasks.register<Copy>("syncWebAssets") {
     from(workspaceRoot.resolve("index.html"))

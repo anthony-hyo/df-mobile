@@ -5,11 +5,6 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
         <title>DF Pocket</title>
         <style>
-            :root {
-                --game-w: 750;
-                --game-h: 550;
-            }
-
             html, body {
                 width: 100%;
                 height: 100%;
@@ -20,12 +15,14 @@
                 touch-action: none;
                 -webkit-user-select: none;
                 user-select: none;
+                font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
             }
 
             body {
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                position: relative;
             }
 
             #stage {
@@ -40,7 +37,234 @@
                 height: 550px;
                 display: block;
             }
+
+            #settingsBtn {
+                position: fixed;
+                top: 12px;
+                right: 12px;
+                width: 44px;
+                height: 44px;
+                border-radius: 50%;
+                background: rgba(0, 0, 0, 0.55);
+                border: 1px solid rgba(255, 255, 255, 0.25);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+                touch-action: manipulation;
+            }
+
+            #settingsBtn svg {
+                width: 22px;
+                height: 22px;
+                fill: #fff;
+            }
+
+            #settingsOverlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.65);
+                z-index: 1001;
+                display: none;
+                align-items: flex-end;
+                justify-content: center;
+            }
+
+            #settingsOverlay.open {
+                display: flex;
+            }
+
+            #settingsPanel {
+                width: 100%;
+                max-width: 480px;
+                max-height: 82vh;
+                overflow-y: auto;
+                background: #1b1b1b;
+                border-radius: 16px 16px 0 0;
+                padding: 8px 20px 20px;
+                color: #eee;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            #settingsPanel .handle {
+                width: 36px;
+                height: 4px;
+                background: #444;
+                border-radius: 999px;
+                margin: 8px auto 12px;
+            }
+
+            #settingsPanel h2 {
+                margin: 0 0 4px;
+                font-size: 18px;
+            }
+
+            .section-label {
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                color: #c0392b;
+                font-weight: 700;
+                margin: 18px 0 4px;
+            }
+
+            .row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 12px 0;
+                border-bottom: 1px solid #2a2a2a;
+                gap: 16px;
+            }
+
+            .row-text .title {
+                font-size: 14.5px;
+            }
+
+            .row-text .desc {
+                font-size: 11.5px;
+                color: #888;
+                margin-top: 2px;
+            }
+
+            .row select {
+                flex-shrink: 0;
+                padding: 8px 10px;
+                border-radius: 8px;
+                border: 1px solid #444;
+                background: #2a2a2a;
+                color: #fff;
+                font-size: 14px;
+                max-width: 150px;
+            }
+
+            .switch {
+                position: relative;
+                width: 46px;
+                height: 27px;
+                flex-shrink: 0;
+            }
+
+            .switch input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+
+            .slider {
+                position: absolute;
+                inset: 0;
+                background: #444;
+                border-radius: 999px;
+                transition: 0.2s;
+            }
+
+            .slider::before {
+                content: "";
+                position: absolute;
+                width: 21px;
+                height: 21px;
+                left: 3px;
+                top: 3px;
+                background: #fff;
+                border-radius: 50%;
+                transition: 0.2s;
+            }
+
+            input:checked + .slider {
+                background: #c0392b;
+            }
+
+            input:checked + .slider::before {
+                transform: translateX(19px);
+            }
+
+            .btn-row {
+                display: flex;
+                gap: 10px;
+                margin-top: 18px;
+                position: sticky;
+                bottom: -20px;
+                background: #1b1b1b;
+                padding: 10px 0 2px;
+            }
+
+            .btn {
+                flex: 1;
+                padding: 13px;
+                border-radius: 10px;
+                border: none;
+                font-size: 15px;
+                font-weight: 600;
+            }
+
+            .btn-apply {
+                background: #c0392b;
+                color: #fff;
+            }
+
+            .btn-reset {
+                background: #2f2f2f;
+                color: #ccc;
+            }
         </style>
+        <script>
+            (function () {
+                const STORAGE_KEY = "df-pocket-ruffle-settings";
+
+                let s;
+
+                try {
+                    s = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+                } catch (e) {
+                    s = {};
+                }
+                window.__dfSettings = s;
+
+                const dprSetting = s.dpr || "1";
+
+                if (dprSetting !== "native") {
+                    try {
+                        const forcedDpr = parseFloat(dprSetting);
+                        Object.defineProperty(window, "devicePixelRatio", {
+                            get: () => forcedDpr,
+                            configurable: true,
+                        });
+                    } catch (e) {
+                        console.warn("Could not override devicePixelRatio", e);
+                    }
+                }
+
+                window.RufflePlayer = window.RufflePlayer || {};
+                window.RufflePlayer.config = {
+                    ...window.RufflePlayer.config,
+                    urlRewriteRules: [
+                        [
+                            /^(?:https?:\/\/[^/]+)?\/?(?:game\/)?(.*)$/i,
+                            "https://play.dragonfable.com/game/$1",
+                        ],
+                    ],
+
+                    preferredRenderer: s.preferredRenderer || "webgl",
+                    quality: s.quality || "medium",
+                    backgroundExecutionMode: s.backgroundExecutionMode ?? "none",
+
+                    letterbox: s.letterbox ?? "off",
+                    allowFullscreen: s.allowFullscreen ?? true,
+
+                    autoplay: s.autoplay === false ? "off" : "auto",
+                    unmuteOverlay: s.unmuteOverlay ?? "visible",
+                    splashScreen: false,
+                    preloader: false,
+
+                    scrollingBehavior: "never",
+                    upgradeToHttps: s.upgradeToHttps ?? true,
+
+                    contextMenu: s.contextMenu ?? "on",
+                    logLevel: s.logLevel ?? "error",
+                };
+            })();
+        </script>
         <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
     </head>
     <body>
@@ -56,39 +280,194 @@
             </object>
         </div>
 
+        <div id="settingsBtn" onclick="toggleSettings(true)">
+            <svg viewBox="0 0 24 24">
+                <path d="M19.14 12.94a7.14 7.14 0 0 0 .06-.94 7.14 7.14 0 0 0-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.3 7.3 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.71 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94L2.83 14.5a.5.5 0 0 0-.12.64l1.92 3.32c.14.24.42.32.6.22l2.39-.96c.49.38 1.03.7 1.62.94l.36 2.54c.05.24.26.42.5.42h3.84c.24 0 .45-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.24.1.46 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"/>
+            </svg>
+        </div>
+
+        <div id="settingsOverlay">
+            <div id="settingsPanel">
+                <div class="handle"></div>
+                <h2>Settings</h2>
+
+                <div class="section-label">Performance</div>
+
+                <div class="row">
+                    <div class="row-text">
+                        <div class="title">Resolution scale</div>
+                        <div class="desc">Lower = faster, blurrier</div>
+                    </div>
+                    <select id="opt-dpr">
+                        <option value="1">1x (fastest)</option>
+                        <option value="1.5">1.5x</option>
+                        <option value="2">2x</option>
+                        <option value="native">Native (sharpest, slowest)</option>
+                    </select>
+                </div>
+
+                <div class="row">
+                    <div class="row-text">
+                        <div class="title">Graphics quality</div>
+                        <div class="desc">Lower = faster</div>
+                    </div>
+                    <select id="opt-quality">
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                        <option value="best">Best</option>
+                    </select>
+                </div>
+
+                <div class="row">
+                    <div class="row-text">
+                        <div class="title">Renderer</div>
+                        <div class="desc">WebGL recommended</div>
+                    </div>
+                    <select id="opt-preferredRenderer">
+                        <option value="webgl">WebGL</option>
+                        <option value="canvas">Canvas</option>
+                    </select>
+                </div>
+
+                <div class="row">
+                    <div class="row-text">
+                        <div class="title">Run in background</div>
+                        <div class="desc">Off saves battery when minimized</div>
+                    </div>
+                    <label class="switch"> <input type="checkbox" id="opt-backgroundExecutionMode">
+                        <span class="slider"></span> </label>
+                </div>
+
+                <div class="section-label">Display</div>
+
+                <div class="row">
+                    <div class="row-text">
+                        <div class="title">Letterbox</div>
+                        <div class="desc">Black bars on mismatched aspect</div>
+                    </div>
+                    <select id="opt-letterbox">
+                        <option value="off">Off</option>
+                        <option value="fullscreen">Fullscreen only</option>
+                        <option value="on">Always</option>
+                    </select>
+                </div>
+
+                <div class="row">
+                    <div class="row-text">
+                        <div class="title">Allow fullscreen</div>
+                    </div>
+                    <label class="switch"> <input type="checkbox" id="opt-allowFullscreen"> <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="section-label">Playback</div>
+
+                <div class="row">
+                    <div class="row-text">
+                        <div class="title">Autoplay</div>
+                    </div>
+                    <label class="switch"> <input type="checkbox" id="opt-autoplay"> <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="row">
+                    <div class="row-text">
+                        <div class="title">Unmute overlay</div>
+                        <div class="desc">Show "tap to unmute" prompt</div>
+                    </div>
+                    <label class="switch"> <input type="checkbox" id="opt-unmuteOverlay"> <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="section-label">Advanced</div>
+
+                <div class="row">
+                    <div class="row-text">
+                        <div class="title">Right-click menu</div>
+                    </div>
+                    <select id="opt-contextMenu">
+                        <option value="on">On</option>
+                        <option value="off">Off</option>
+                    </select>
+                </div>
+
+                <div class="row">
+                    <div class="row-text">
+                        <div class="title">Log level</div>
+                        <div class="desc">For debugging only</div>
+                    </div>
+                    <select id="opt-logLevel">
+                        <option value="error">Error</option>
+                        <option value="warn">Warn</option>
+                        <option value="info">Info</option>
+                        <option value="debug">Debug</option>
+                    </select>
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn btn-reset" onclick="resetSettings()">Reset</button>
+                    <button class="btn btn-apply" onclick="applySettings()">Apply</button>
+                </div>
+            </div>
+        </div>
+
         <script>
-            window.RufflePlayer = window.RufflePlayer || {};
-            window.RufflePlayer.config = {
-                ...window.RufflePlayer.config,
-                urlRewriteRules: [
-                    [
-                        /^(?:https?:\/\/[^/]+)?\/?(?:game\/)?(.*)$/i,
-                        "https://play.dragonfable.com/game/$1",
-                    ],
-                ],
-                
-                preferredRenderer: "webgl", 
-                quality: "high",
-                letterbox: "off",
-                splashScreen: false,
-                preloader: false,
-                scrollingBehavior: "never",
-                deviceFontRenderer: "embedded",
-                backgroundExecutionMode: "none",
-                logLevel: "error",
-            };
-            
+            const STORAGE_KEY = "df-pocket-ruffle-settings";
+
+            function el(id) {
+                return document.getElementById(id);
+            }
+
+            function loadIntoForm() {
+                const s = window.__dfSettings || {};
+                el("opt-dpr").value = s.dpr || "1";
+                el("opt-quality").value = s.quality || "medium";
+                el("opt-preferredRenderer").value = s.preferredRenderer || "webgl";
+                el("opt-backgroundExecutionMode").checked = (s.backgroundExecutionMode ?? "none") === "mainThread";
+                el("opt-letterbox").value = s.letterbox || "off";
+                el("opt-allowFullscreen").checked = s.allowFullscreen !== false;
+                el("opt-autoplay").checked = s.autoplay !== false;
+                el("opt-unmuteOverlay").checked = (s.unmuteOverlay ?? "visible") === "visible";
+                el("opt-contextMenu").value = s.contextMenu || "on";
+                el("opt-logLevel").value = s.logLevel || "error";
+            }
+
+            function toggleSettings(open) {
+                if (open) loadIntoForm();
+                el("settingsOverlay").classList.toggle("open", open);
+            }
+
+            document.getElementById("settingsOverlay").addEventListener("click", function (e) {
+                if (e.target === this) toggleSettings(false);
+            });
+
+            function applySettings() {
+                const settings = {
+                    dpr: el("opt-dpr").value,
+                    quality: el("opt-quality").value,
+                    preferredRenderer: el("opt-preferredRenderer").value,
+                    backgroundExecutionMode: el("opt-backgroundExecutionMode").checked ? "mainThread" : "none",
+                    letterbox: el("opt-letterbox").value,
+                    allowFullscreen: el("opt-allowFullscreen").checked,
+                    autoplay: el("opt-autoplay").checked,
+                    unmuteOverlay: el("opt-unmuteOverlay").checked ? "visible" : "hidden",
+                    contextMenu: el("opt-contextMenu").value,
+                    logLevel: el("opt-logLevel").value,
+                };
+
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+
+                window.AndroidBridge.reloadGame();
+            }
+
+            function resetSettings() {
+                localStorage.removeItem(STORAGE_KEY);
+                window.AndroidBridge.reloadGame();
+            }
+
             (function () {
-                try {
-                    Object.defineProperty(window, "devicePixelRatio", {
-                        get: () => 1,
-                        configurable: true,
-                    });
-                } catch (e) {
-                    console.warn(e);
-                }
-                
-                const stage = document.getElementById('stage');
+                const stage = document.getElementById("stage");
                 const GAME_W = 750;
                 const GAME_H = 550;
 
@@ -96,11 +475,11 @@
                     const vw = window.innerWidth;
                     const vh = window.innerHeight;
                     const scale = Math.min(vw / GAME_W, vh / GAME_H);
-                    stage.style.transform = 'scale(' + scale + ')';
+                    stage.style.transform = "scale(" + scale + ")";
                 }
 
-                window.addEventListener('resize', resize);
-                window.addEventListener('orientationchange', () => setTimeout(resize, 50));
+                window.addEventListener("resize", resize);
+                window.addEventListener("orientationchange", () => setTimeout(resize, 50));
 
                 resize();
             })();
