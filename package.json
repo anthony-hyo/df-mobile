@@ -1,8 +1,0 @@
-{
-  "name": "df-mobile",
-  "version": "0.1.0",
-  "scripts": {
-    "android:apk": "cd android && gradlew.bat assembleDebug"
-  },
-  "private": true
-}
